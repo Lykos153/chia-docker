@@ -22,6 +22,5 @@ jobs:
           with:
             username: ${{ github.actor }}
             password: ${{ secrets.GITHUB_TOKEN }}
-          with:
             push: true
             tags: ghcr.io/lykos153/chia-plotter-docker:latest
