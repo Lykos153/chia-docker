@@ -3,8 +3,8 @@ name: Publish Docker image
 on:
   push:
     branches: [ main ]
+    tags: [ v* ]
   pull_request:
-    branches: [ main ]
 
 env:
   IMAGE_NAME: chia-plotter
