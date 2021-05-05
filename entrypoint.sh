@@ -25,9 +25,13 @@ if [ "$#" -eq 0 ]; then
     if [ -n "$TMP2_DIR" ]; then
         plot_cmd+=" -2$TMP2_DIR"
     fi
-    if [ "$TEST_MODE" == "yes" ]; then
-        plot_cmd+=" -k25 --override-k"
+    if [ -n "$SIZE" ]; then
+        plot_cmd+=" -k$SIZE"
     fi
+    if [ "$TEST_MODE" == "yes" ]; then
+        plot_cmd+=" --override-k"
+    fi
+
 
     chia init > /dev/null
     if [ "$NUMBER" == "infinity" ]; then
