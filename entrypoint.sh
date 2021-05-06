@@ -12,7 +12,7 @@ if [ "$#" -eq 0 ]; then
 
     mkdir -p "${TMP_DIR-/}" "${TMP2_DIR-/}" "${FINAL_DIR-/}"
 
-    plot_cmd="chia plots create -f$FARMER_PUBKEY -p$POOL_PUBKEY -d$FINAL_DIR"
+    plot_cmd="chia plots create -x -f$FARMER_PUBKEY -p$POOL_PUBKEY -d$FINAL_DIR"
     if [ -n "$BUFFER" ]; then
         plot_cmd+=" -b$BUFFER"
     fi
