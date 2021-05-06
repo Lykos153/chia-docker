@@ -1,4 +1,0 @@
-#!/bin/bash
-
-touch /root/stoprun
-echo "Stopping after current plot"

@@ -1,5 +1,15 @@
 #!/bin/bash
 set -e
+_term() {
+    RED='\033[0;31m'
+    NC='\033[0m'
+    printf "${RED}CAUGHT STOP SIGNAL!${NC} "
+    echo "Stopping when current plot is finished"
+    wait $plot_pid
+}
+
+trap _term SIGTERM
+trap _term SIGINT
 
 if [ "$#" -eq 0 ]; then
 
@@ -36,12 +46,18 @@ if [ "$#" -eq 0 ]; then
 
     chia init > /dev/null
     if [ "$NUMBER" == "infinity" ]; then
-        while [ ! -f /root/stoprun ]
+        while [ "$STOP" != "true" ]
         do
-            $plot_cmd -n1
+            $plot_cmd -n1 &
+            plot_pid=$!
+            wait $plot_pid
         done
     else
-        $plot_cmd -n$NUMBER
+        $plot_cmd -n$NUMBER &
+        plot_pid=$!
+        wait $plot_pid
+        ret=$?
+        exit $ret
     fi
 else
     exec $@
