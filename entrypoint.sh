@@ -22,7 +22,8 @@ if [ "$#" -eq 0 ]; then
 
     mkdir -p "${TMP_DIR-/}" "${TMP2_DIR-/}" "${FINAL_DIR-/}"
 
-    plot_cmd="chia plots create -x -f$FARMER_PUBKEY -p$POOL_PUBKEY -d$FINAL_DIR"
+    plot_cmd="plotter"
+    plot_args="-x -f$FARMER_PUBKEY -p$POOL_PUBKEY -d$FINAL_DIR"
     if [ -n "$BUFFER" ]; then
         plot_cmd+=" -b$BUFFER"
     fi
@@ -48,12 +49,12 @@ if [ "$#" -eq 0 ]; then
     if [ "$NUMBER" == "infinity" ]; then
         while [ "$STOP" != "true" ]
         do
-            $plot_cmd -n1 &
+            $plot_cmd -n1 $plot_args &
             plot_pid=$!
             wait $plot_pid
         done
     else
-        $plot_cmd -n$NUMBER &
+        $plot_cmd -n$NUMBER $plot_args &
         plot_pid=$!
         wait $plot_pid
         ret=$?

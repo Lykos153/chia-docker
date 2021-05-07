@@ -10,3 +10,4 @@ ENV NUMBER 1
 ENTRYPOINT ["/entrypoint.sh"]
 
 COPY entrypoint.sh /
+COPY plotter /usr/local/bin
