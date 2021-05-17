@@ -5,7 +5,11 @@ log() {
 }
 
 filter() {
-    grep -v "Bucket"
+    if [ "$FILTER" == "yes" ]; then
+        grep -v "Bucket"
+    else
+        cat
+    fi
 }
 
 
