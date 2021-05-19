@@ -1,6 +1,5 @@
-FROM python:3.7
-
-RUN pip install --extra-index-url https://hosted.chia.net/simple/ chia-blockchain
+ARG CHIA_VERSION
+FROM lykos153/chia-base:${CHIA_VERSION}
 
 ENV FINAL_DIR /plots
 ENV TMP_DIR /tmp
