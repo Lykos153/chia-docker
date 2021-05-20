@@ -3,10 +3,18 @@ set -e
 
 if [ "$#" -eq 0 ]; then
     CA_DIR=/ca
+    PLOT_DIR=/plots
 
     for varname in FARMER_PEER FARMER_PORT; do
         if [ -z "${!varname}" ]; then
             echo "ERROR: $varname is not set."
+            exit 1
+        fi
+    done
+
+    for dirname in "$CA_DIR" "$PLOT_DIR"; do
+        if [ ! -d "${dirname}" ]; then
+            echo "ERROR: $dirname is not mounted or is not a directory."
             exit 1
         fi
     done
@@ -16,7 +24,7 @@ if [ "$#" -eq 0 ]; then
 
     chia init
     chia init -c "$CA_DIR"
-    chia plots add -d /plots
+    chia plots add -d "$PLOT_DIR"
 
 
     if [ "$DISABLE_IP6" == "true" ]; then
