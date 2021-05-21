@@ -15,7 +15,12 @@ plotter: base
 harvester: base
 	make -C harvester image
 
+.PHONY: farmer
+farmer: base
+	make -C farmer image
+
 push:
 	make -C base-image push
 	make -C plotter push
 	make -C harvester push
+	make -C farmer push
