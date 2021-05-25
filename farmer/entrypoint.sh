@@ -13,11 +13,6 @@ if [ "$#" -eq 0 ]; then
         fi
     done
 
-    if [ ! -f "$FARMING_KEY_FILE" ] || [ ! -s "$FARMING_KEY_FILE" ]; then
-        echo "ERROR: "$FARMING_KEY_FILE" is not mounted or is empty."
-        exit 1
-    fi
-
     if [ ! -d "$CA_DIR" ]; then
         echo "ERROR: $CA_DIR is not mounted."
         exit 1
@@ -29,9 +24,20 @@ if [ "$#" -eq 0 ]; then
     chia init >/dev/null
     chia init -c "$CA_DIR"
 
-    while read -r line; do
-        echo $line | chia keys add | grep "Setting the xch destination"
-    done < "$FARMING_KEY_FILE"
+    if [ -f "$FARMING_KEY_FILE" ] && [ -s "$FARMING_KEY_FILE" ]; then
+        while read -r line; do
+            echo $line | chia keys add | grep "Setting the xch destination"
+        done < "$FARMING_KEY_FILE"
+    elif [ -d "$FARMING_KEY_FILE" ]; then
+        for f in "$FARMING_KEY_FILE"/*; do
+            while read -r line; do
+                echo $line | chia keys add | grep "Setting the xch destination"
+            done < "$f"
+        done
+    else
+        echo "ERROR: "$FARMING_KEY_FILE" is not mounted or is empty."
+        exit 1
+    fi
 
     if [ "$DISABLE_IP6" == "true" ]; then
         sed -i 's/localhost/127.0.0.1/g' "$config_file"
