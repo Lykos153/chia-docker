@@ -1,4 +1,5 @@
 export CHIA_VERSION=1.1.5
+export PLATFORMS=linux/amd64,linux/arm64
 
 .PHONY: all
 all: plotter harvester farmer full-node
@@ -29,3 +30,10 @@ push:
 	make -C harvester push
 	make -C farmer push
 	make -C full-node push
+
+multiarch:
+	make -C base-image multiarch
+	make -C plotter multiarch
+	make -C harvester multiarch
+	make -C farmer multiarch
+	make -C full-node multiarch

@@ -25,12 +25,12 @@ if [ "$#" -eq 0 ]; then
     chia init -c "$CA_DIR"
 
     if [ -f "$FARMING_KEY_FILE" ] && [ -s "$FARMING_KEY_FILE" ]; then
-        while read -r line; do
+        while IFS='' read -r line || [ -n "${line}" ]; do # Catch files that don't end with newline https://unix.stackexchange.com/a/580545
             echo $line | chia keys add | grep "Setting the xch destination"
         done < "$FARMING_KEY_FILE"
     elif [ -d "$FARMING_KEY_FILE" ]; then
         for f in "$FARMING_KEY_FILE"/*; do
-            while read -r line; do
+            while IFS='' read -r line || [ -n "${line}" ]; do
                 echo $line | chia keys add | grep "Setting the xch destination"
             done < "$f"
         done

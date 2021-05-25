@@ -7,3 +7,7 @@ image:
 .PHONY: push
 push: image
 	docker push ${IMAGE_NAME}
+
+.PHONY: multiarch
+multiarch:
+	docker buildx build --platform ${PLATFORMS} --tag ${IMAGE_NAME} --build-arg CHIA_VERSION=${CHIA_VERSION} --push .
