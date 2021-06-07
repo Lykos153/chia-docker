@@ -1,4 +1,4 @@
-export CHIA_VERSION=1.1.5
+export CHIA_VERSION=1.1.7
 export PLATFORMS=linux/amd64,linux/arm64
 
 .PHONY: all
