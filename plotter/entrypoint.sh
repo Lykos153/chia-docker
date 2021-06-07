@@ -11,6 +11,16 @@ _term() {
 trap _term SIGTERM
 trap _term SIGINT
 
+
+
+rsync-plot() {
+    until rsync -vPh --preallocate --remove-source-files "$FINAL_DIR"/*.plot "$RSYNC_TARGET"
+    do
+        echo "Couldn't send plot to rsync destination. Retrying in $RSYNC_RETRY_SEC seconds"
+        sleep "$RSYNC_RETRY_SEC"
+    done
+}
+
 if [ "$#" -eq 0 ]; then
 
     for varname in FARMER_PUBKEY POOL_PUBKEY; do
@@ -19,6 +29,7 @@ if [ "$#" -eq 0 ]; then
             exit 1
         fi
     done
+
 
     mkdir -p "${TMP_DIR-/}" "${TMP2_DIR-/}" "${FINAL_DIR-/}"
 
@@ -52,12 +63,18 @@ if [ "$#" -eq 0 ]; then
             $plot_cmd -n1 $plot_args &
             plot_pid=$!
             wait $plot_pid
+            if [ -n "$RSYNC_TARGET" ]; then
+                rsync-plot
+            fi
         done
     else
         $plot_cmd -n$NUMBER $plot_args &
         plot_pid=$!
         wait $plot_pid
         ret=$?
+        if [ -n "$RSYNC_TARGET" ]; then
+            rsync-plot
+        fi
         exit $ret
     fi
 else
