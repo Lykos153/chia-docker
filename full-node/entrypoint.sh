@@ -4,7 +4,7 @@ set -e
 if [ "$#" -eq 0 ]; then
     CA_DIR=/ca
 
-    for varname in PORT INTRODUCER_PEER INTRODUCER_PORT; do
+    for varname in PORT INTRODUCER_PEER INTRODUCER_PORT LOG_LEVEL; do
         if [ -z "${!varname}" ]; then
             echo "ERROR: $varname is not set."
             exit 1

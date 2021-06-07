@@ -6,7 +6,7 @@ if [ "$#" -eq 0 ]; then
     FARMING_KEY_FILE=/farming_keys
 
 
-    for varname in FULL_NODE_PEER FULL_NODE_PORT PORT TARGET_ADDRESS POOL_ADDRESS; do
+    for varname in FULL_NODE_PEER FULL_NODE_PORT PORT TARGET_ADDRESS POOL_ADDRESS LOG_LEVEL; do
         if [ -z "${!varname}" ]; then
             echo "ERROR: $varname is not set."
             exit 1
