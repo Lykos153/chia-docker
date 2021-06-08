@@ -16,9 +16,26 @@ trap _term SIGINT
 rsync-plot() {
     until rsync -vPh --preallocate --remove-source-files "$FINAL_DIR"/*.plot "$RSYNC_TARGET"
     do
-        echo "Couldn't send plot to rsync destination. Retrying in $RSYNC_RETRY_SEC seconds"
-        sleep "$RSYNC_RETRY_SEC"
+        echo "Couldn't send plot to rsync destination. Retrying in $TRANSFER_RETRY_SEC seconds"
+        sleep "$TRANSFER_RETRY_SEC"
     done
+}
+
+tarpipe-plot() {
+    (
+        cd "$FINAL_DIR"
+        shopt -s nullglob # https://unix.stackexchange.com/a/162589
+        for plot in *.plot; do
+            echo "Sending $plot via tarpipe to $TARPIPE_HOST:$TARPIPE_PORT..."
+            until
+                tar -c "$plot" | nc -q1 "$TARPIPE_HOST" "$TARPIPE_PORT" >/dev/null &&
+                rm "$plot"
+            do
+                echo "Couldn't send $plot to tarpipe destination. Retrying in $TRANSFER_RETRY_SEC seconds"
+                sleep "$TRANSFER_RETRY_SEC"
+            done
+        done
+    )
 }
 
 if [ "$#" -eq 0 ]; then
@@ -29,7 +46,6 @@ if [ "$#" -eq 0 ]; then
             exit 1
         fi
     done
-
 
     mkdir -p "${TMP_DIR-/}" "${TMP2_DIR-/}" "${FINAL_DIR-/}"
 
@@ -65,6 +81,8 @@ if [ "$#" -eq 0 ]; then
             wait $plot_pid
             if [ -n "$RSYNC_TARGET" ]; then
                 rsync-plot
+            elif [ -n "$TARPIPE_HOST" ]; then
+                tarpipe-plot
             fi
         done
     else
@@ -74,6 +92,8 @@ if [ "$#" -eq 0 ]; then
         ret=$?
         if [ -n "$RSYNC_TARGET" ]; then
             rsync-plot
+        elif [ -n "$TARPIPE_HOST" ]; then
+            tarpipe-plot
         fi
         exit $ret
     fi
