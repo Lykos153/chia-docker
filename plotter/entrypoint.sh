@@ -38,6 +38,66 @@ tarpipe-plot() {
     )
 }
 
+next_plot() {
+    (
+        set -o pipefail
+        plot="$(ls "$FINAL_DIR"/*.plot 2>/dev/null | head -n1)"
+        if [ -n "$plot" ]; then
+            echo "$plot"
+            return 0
+        else
+            return 1
+        fi
+    )
+}
+
+
+_ftp_send() {
+    plot="$1"
+    ipa="$2"
+
+    options=""
+    if [ -n "$FTP_USER" ] && [ -n "$FTP_PASSWORD" ]; then
+        netrc="$HOME/.netrc"
+        echo "machine $ipa" > "$netrc"
+        echo "login $FTP_USER" >> "$netrc"
+        echo "password $FTP_PASSWORD" >> "$netrc"
+        options+="--netrc-file $netrc"
+    fi
+    curl $options --upload-file "$plot" "ftp://$ipa" || return 1
+}
+
+ftp-plot() {
+    echo "Sending plot via FTP..."
+    while next_plot; do
+        plot=$(next_plot)
+        if [ "$TRY_ALL_IPS" == "yes" ]; then
+            for ipa in $(dig "$FTP_HOST" +short); do
+                echo "Sending $plot to ftp://$ipa..."
+                _ftp_send "$plot" "$ipa"
+                ret=$?
+                if [ "$ret" -eq 0 ]; then
+                    break
+                fi
+            done
+        else
+            _ftp_send "$plot" "$FTP_HOST"
+            ret=$?
+        fi
+        if [ "$ret" -eq 0 ]; then
+            rm "$plot"
+            if [ $? -ne 0 ]; then
+                echo "Error deleting $plot."
+                exit 1
+            fi
+        else
+            echo "Couldn't send $plot to ftp://$FTP_HOST. Retrying in $TRANSFER_RETRY_SEC seconds"
+            sleep "$TRANSFER_RETRY_SEC"
+        fi
+        sleep 5
+    done
+}
+
 if [ "$#" -eq 0 ]; then
 
     for varname in FARMER_PUBKEY POOL_PUBKEY; do
@@ -83,7 +143,10 @@ if [ "$#" -eq 0 ]; then
                 rsync-plot
             elif [ -n "$TARPIPE_HOST" ]; then
                 tarpipe-plot
+            elif [ -n "$FTP_HOST" ]; then
+                ftp-plot
             fi
+            sleep 1
         done
     else
         $plot_cmd -n$NUMBER $plot_args &
@@ -94,6 +157,8 @@ if [ "$#" -eq 0 ]; then
             rsync-plot
         elif [ -n "$TARPIPE_HOST" ]; then
             tarpipe-plot
+        elif [ -n "$FTP_HOST" ]; then
+            ftp-plot
         fi
         exit $ret
     fi
