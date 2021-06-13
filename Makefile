@@ -12,6 +12,10 @@ base:
 plotter: base
 	make -C plotter image
 
+.PHONY: plotter-madmax
+plotter-madmax: base
+	make -C plotter-madmax image
+
 .PHONY: harvester
 harvester: base
 	make -C harvester image
@@ -34,6 +38,7 @@ push:
 multiarch:
 	make -C base-image multiarch
 	make -C plotter multiarch
+	make -C plotter-madmax multiarch
 	make -C harvester multiarch
 	make -C farmer multiarch
 	make -C full-node multiarch
